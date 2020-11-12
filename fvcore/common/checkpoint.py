@@ -95,7 +95,7 @@ class Checkpointer(object):
             torch.save(data, f)
         self.tag_last_checkpoint(basename)
 
-    def load(self, path: str, checkpointables: Optional[List[str]] = None) -> object:
+    def load(self, path: str, from_last_checkpoint: bool = False, checkpointables: Optional[List[str]] = None) -> object:
         """
         Load from the given checkpoint. When path points to network file, this
         function has to be called on all ranks.
@@ -127,11 +127,20 @@ class Checkpointer(object):
         ):  # handle some existing subclasses that returns None
             self._log_incompatible_keys(incompatible)
 
-        for key in self.checkpointables if checkpointables is None else checkpointables:
-            if key in checkpoint:  # pyre-ignore
-                self.logger.info("Loading {} from {}".format(key, path))
-                obj = self.checkpointables[key]
-                obj.load_state_dict(checkpoint.pop(key))  # pyre-ignore
+        # Added If and else based on textfusenet's implementation
+        if from_last_checkpoint:
+            for key in self.checkpointables if checkpointables is None else checkpointables:
+                if key in checkpoint:  # pyre-ignore
+                    self.logger.info("Loading {} from {}".format(key, path))
+                    obj = self.checkpointables[key]
+                    obj.load_state_dict(checkpoint.pop(key))  # pyre-ignore
+        else:
+            if "optimizer" in checkpoint:
+                checkpoint.pop("optimizer")
+            if "scheduler" in checkpoint:
+                checkpoint.pop("scheduler")
+            if "iteration" in checkpoint:
+                checkpoint.pop("iteration")
 
         # return any further checkpoint data
         return checkpoint
@@ -190,7 +199,7 @@ class Checkpointer(object):
         """
         if resume and self.has_checkpoint():
             path = self.get_checkpoint_file()
-            return self.load(path)
+            return self.load(path, from_last_checkpoint=True) # added True for textfusenet
         else:
             return self.load(path, checkpointables=[])
 
