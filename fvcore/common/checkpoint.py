@@ -118,6 +118,7 @@ class Checkpointer(object):
             return {}
         self.logger.info("Loading checkpoint from {}".format(path))
         print(f'os.getcwd() = {os.getcwd()} ')
+        print(f'os.listdir(os.getcwd()) = {os.getcwd(os.getcwd())} ')
         if not os.path.isfile(path):
             path = self.path_manager.get_local_path(path)
             assert os.path.isfile(path), "Checkpoint {} not found!".format(path)
