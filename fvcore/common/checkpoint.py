@@ -117,8 +117,6 @@ class Checkpointer(object):
             self.logger.info("No checkpoint found. Initializing model from scratch")
             return {}
         self.logger.info("Loading checkpoint from {}".format(path))
-        print(f'os.getcwd() = {os.getcwd()} ')
-        print(f'os.listdir(os.getcwd()) = {os.listdir(os.getcwd())} ')
         if not os.path.isfile(path):
             path = self.path_manager.get_local_path(path)
             assert os.path.isfile(path), "Checkpoint {} not found!".format(path)
