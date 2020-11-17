@@ -13,6 +13,7 @@ from fvcore.common.file_io import PathManager, PathManagerBase
 from termcolor import colored
 from torch.nn.parallel import DataParallel, DistributedDataParallel
 
+import os
 
 __all__ = ["Checkpointer", "PeriodicCheckpointer"]
 
@@ -116,6 +117,7 @@ class Checkpointer(object):
             self.logger.info("No checkpoint found. Initializing model from scratch")
             return {}
         self.logger.info("Loading checkpoint from {}".format(path))
+        print(f'{os.getcwd() = }')
         if not os.path.isfile(path):
             path = self.path_manager.get_local_path(path)
             assert os.path.isfile(path), "Checkpoint {} not found!".format(path)
